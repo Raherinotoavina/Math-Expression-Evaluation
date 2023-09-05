@@ -1,6 +1,5 @@
 function calc(exp) {
     const expNoSpace = exp.replaceAll(" ", "");
-    const expGoodOp = removeDuplOperator(expNoSpace);
     return evalExpNoBracket(expGoodOp);
 }
 
@@ -28,17 +27,17 @@ function evalExpNoBracket(exp) {
     if (Number(exp)) {
         return exp;
     }
-    // Pour les multiplications
-    const multIndex = exp.lastIndexOf("*");
-    if (multIndex !== -1) {
-        exp = opLogic(exp, multIndex, "*");
-        return evalExpNoBracket(exp);
-    }
-
     // Pour la division
     const divIndex = exp.lastIndexOf("/");
     if (divIndex !== -1) {
         exp = opLogic(exp, divIndex, "/");
+        return evalExpNoBracket(exp);
+    }
+
+    // Pour les multiplications
+    const multIndex = exp.lastIndexOf("*");
+    if (multIndex !== -1) {
+        exp = opLogic(exp, multIndex, "*");
         return evalExpNoBracket(exp);
     }
 
@@ -65,16 +64,20 @@ function opLogic(exp, multIndex, operateur) {
     const firstValue = getFirst(exp, multIndex);
     const lastValue = getLast(exp, multIndex);
     let value;
-    if (operateur === "*")
-        value = Number(firstValue.value) * Number(lastValue.value);
-    else if (operateur === "/")
+    if (operateur === "/")
         value = Number(firstValue.value) / Number(lastValue.value);
+    else if (operateur === "*")
+        value = Number(firstValue.value) * Number(lastValue.value);
     else if (operateur === "+")
         value = Number(firstValue.value) + Number(lastValue.value);
     else if (operateur === "-") {
         console.log("Je suis l'operateur : -");
         value = Number(firstValue.value) - Number(lastValue.value);
     }
+    const valueToReplace = exp.slice(
+        firstValue.indexValue,
+        lastValue.indexValue
+    );
     if (value > 0) {
         console.log(
             "First index : ",
@@ -84,14 +87,12 @@ function opLogic(exp, multIndex, operateur) {
         );
         if (firstValue.indexValue === 0) {
             value = value;
+        } else if (valueToReplace[0] === "/") {
+            value = "/" + value;
         } else {
             value = "+" + value;
         }
     }
-    const valueToReplace = exp.slice(
-        firstValue.indexValue,
-        lastValue.indexValue
-    );
     console.log(`Les deux valeurs : ${firstValue.value} || ${lastValue.value}`);
     console.log("Valeur :", value);
     console.log("Remplacement :", valueToReplace);
@@ -108,7 +109,12 @@ function getFirst(exp, index) {
     while (true) {
         indexValue--;
         if (exp[indexValue] === "-") value += "-";
-        if (exp[indexValue] !== "." && !Number(exp[indexValue])) break;
+        if (
+            exp[indexValue] !== "." &&
+            !Number(exp[indexValue]) &&
+            exp[indexValue] !== "0"
+        )
+            break;
         value += exp[indexValue];
     }
     if (indexValue === -1) {
@@ -144,4 +150,4 @@ function getLast(exp, index) {
     };
 }
 
-console.log(calc("81-16+26-6255-57"));
+console.log(calc("1.7320000000000002+6"));
