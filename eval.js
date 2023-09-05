@@ -1,6 +1,30 @@
-function calc(exp) {
-    const expNoSpace = exp.replaceAll(" ", "");
-    return evalExpNoBracket(expNoSpace);
+function calc(expression) {
+    let expressionNoSpace = expression.replaceAll(" ", "");
+    for (let i = 0; i < expressionNoSpace.length; i++) {
+        const lastIndexOfOpen = expressionNoSpace.lastIndexOf("(");
+        let firstIndexOfClose;
+        for (let j = lastIndexOfOpen; j < expressionNoSpace.length; j++) {
+            if (expressionNoSpace[j] === ")") {
+                firstIndexOfClose = j;
+                break;
+            }
+        }
+        const expressionBetween = expressionNoSpace.slice(
+            lastIndexOfOpen,
+            firstIndexOfClose + 1
+        );
+        const expressionBetweenEval = evalExpNoBracket(
+            expressionBetween.slice(1, expressionBetween.length - 1)
+        );
+        expressionNoSpace = expressionNoSpace.replace(
+            expressionBetween,
+            expressionBetweenEval
+        );
+        if (lastIndexOfOpen === -1 || !firstIndexOfClose) {
+            break;
+        }
+    }
+    return evalExpNoBracket(expressionNoSpace);
 }
 
 // Mandamina ny operateur
@@ -8,14 +32,17 @@ function removeDuplOperator(exp) {
     for (let i = 0; i < exp.length; i++) {
         if (exp[i] === "-" && exp[i + 1] === "-") {
             exp = exp.replaceAll("--", "+");
+            i = 0;
         } else if (
             (exp[i] === "+" && exp[i + 1] === "-") ||
             (exp[i] === "-" && exp[i + 1] === "+")
         ) {
             exp = exp.replaceAll("-+", "-");
             exp = exp.replaceAll("+-", "-");
+            i = 0;
         } else if (exp[i] === "+" && exp[i + 1] === "+") {
             exp = exp.replaceAll("++", "+");
+            i = 0;
         }
     }
     console.log("Operateur milamina : ", exp);
@@ -25,8 +52,10 @@ function removeDuplOperator(exp) {
 // Mievalue expression tsy misy entre parenthese
 function evalExpNoBracket(exp) {
     if (Number(exp)) {
-        return exp;
+        return Number(exp);
     }
+
+    exp = removeDuplOperator(exp);
 
     const divIndex = exp.lastIndexOf("/");
     const multIndex = exp.lastIndexOf("*");
@@ -131,6 +160,12 @@ function getFirst(exp, index) {
             break;
         value += exp[indexValue];
     }
+    if (!value) {
+        return {
+            value: 0,
+            indexValue,
+        };
+    }
     if (indexValue === -1) {
         indexValue++;
     }
@@ -164,4 +199,6 @@ function getLast(exp, index) {
     };
 }
 
-console.log(calc("012*123/+3"));
+console.log(
+    calc("-(89) - (-17 * -71 * -(31)) + (92 - -((((24 - 77)))) + -49)")
+);
