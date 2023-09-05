@@ -1,6 +1,6 @@
 function calc(exp) {
     const expNoSpace = exp.replaceAll(" ", "");
-    return evalExpNoBracket(expGoodOp);
+    return evalExpNoBracket(expNoSpace);
 }
 
 // Mandamina ny operateur
@@ -27,29 +27,43 @@ function evalExpNoBracket(exp) {
     if (Number(exp)) {
         return exp;
     }
-    // Pour la division
-    const divIndex = exp.lastIndexOf("/");
-    if (divIndex !== -1) {
-        exp = opLogic(exp, divIndex, "/");
-        return evalExpNoBracket(exp);
-    }
 
-    // Pour les multiplications
+    const divIndex = exp.lastIndexOf("/");
     const multIndex = exp.lastIndexOf("*");
-    if (multIndex !== -1) {
-        exp = opLogic(exp, multIndex, "*");
-        return evalExpNoBracket(exp);
+    const addIndex = exp.lastIndexOf("+");
+    const subIndex = exp.lastIndexOf("-");
+
+    if (multIndex < divIndex) {
+        // Pour les multiplications
+        if (multIndex !== -1) {
+            exp = opLogic(exp, multIndex, "*");
+            return evalExpNoBracket(exp);
+        }
+        // Pour la division
+        if (divIndex !== -1) {
+            exp = opLogic(exp, divIndex, "/");
+            return evalExpNoBracket(exp);
+        }
+    } else {
+        // Pour la division
+        if (divIndex !== -1) {
+            exp = opLogic(exp, divIndex, "/");
+            return evalExpNoBracket(exp);
+        }
+        // Pour les multiplications
+        if (multIndex !== -1) {
+            exp = opLogic(exp, multIndex, "*");
+            return evalExpNoBracket(exp);
+        }
     }
 
     // Pour l'addition
-    const addIndex = exp.lastIndexOf("+");
     if (addIndex !== -1) {
         exp = opLogic(exp, addIndex, "+");
         return evalExpNoBracket(exp);
     }
 
     // Pour la soustraction
-    const subIndex = exp.lastIndexOf("-");
     if (subIndex !== -1) {
         exp = opLogic(exp, subIndex, "-");
         return evalExpNoBracket(exp);
@@ -150,4 +164,4 @@ function getLast(exp, index) {
     };
 }
 
-console.log(calc("1.7320000000000002+6"));
+console.log(calc("012*123/+3"));
